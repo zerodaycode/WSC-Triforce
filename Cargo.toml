@@ -3,10 +3,8 @@ name = "WSC-Triforce"
 version = "0.1.0"
 edition = "2021"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies]
-rocket = "0.5.0-rc.1"
+rocket = { version = "0.5.0-rc.2", features = ["json"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
-canyon_sql = { git = "https://github.com/zerodaycode/Canyon-SQL.git", branch="managed_state"}
+canyon_sql = { git = "https://github.com/zerodaycode/Canyon-SQL.git", branch="hotfix/credentials-parser" }
