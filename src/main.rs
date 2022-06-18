@@ -11,11 +11,11 @@ use rocket::serde::json::Json;
 #[macro_use] extern crate rocket;
 
 #[get("/")]
-async fn json() -> Json<String> {
+async fn json() -> status::Custom<Json<String>> {
     let all_teams: Vec<Team> = Team::find_all().await;
     let json = serde_json::to_string(&all_teams).unwrap();
     println!("Result: {:?}", json);
-    Json(json)
+    status::Custom(Status::Accepted, Json(json))
 }
 
 #[canyon]
