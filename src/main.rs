@@ -18,8 +18,11 @@ async fn json() -> Json<String> {
     Json(json)
 }
 
-#[launch]
 #[canyon]
-fn rocket() -> _ {
-    rocket::build().mount("/", routes![json])
+fn main() {
+    rocket::build()
+        .mount("/", routes![json])
+        .launch()
+        .await
+        .ok(); // TODO Tremendous error handling instead .ok()
 }
