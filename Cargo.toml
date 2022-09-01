@@ -7,4 +7,4 @@ edition = "2021"
 rocket = { version = "0.5.0-rc.2", features = ["json"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
-canyon_sql = { git = "https://github.com/zerodaycode/Canyon-SQL.git", branch="hotfix/credentials-parser" }
+canyon_sql = { path = "/home/alexvergara/code/zero_day_code/Canyon-SQL/canyon_sql" }
