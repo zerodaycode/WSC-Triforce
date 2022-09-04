@@ -1,4 +1,4 @@
-// extern crate rocket;
+extern crate rocket;
 
 use rocket::get;
 use rocket::http::Status;
@@ -12,13 +12,13 @@ use rocket::serde::json::Json;
 
 
 #[get("/")]
-async fn json() -> status::Custom<Json<Vec<Team>>> {
+async fn teams() -> status::Custom<Json<Vec<Team>>> {
     let all_teams: Vec<Team> = Team::find_all().await;
     status::Custom(Status::Accepted, Json(all_teams))
 }
 
 #[rocket::launch]
-fn rocket() -> _{
+fn rocket() -> _ {
     rocket::build()
-        .mount("/", rocket::routes![json])
+        .mount("/", rocket::routes![teams])
 }

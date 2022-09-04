@@ -4,6 +4,7 @@ use canyon_sql::*;
 #[derive(Debug, Clone, CanyonCrud, CanyonMapper, Serialize)]
 #[canyon_macros::canyon_entity]
 pub struct Team {
+    #[primary_key]
     id: i32,
     ext_id: i64,
     name: String,
