@@ -1,4 +1,4 @@
-use serde::{Serialize};
+use serde::Serialize;
 use canyon_sql::*;
 
 #[derive(Debug, Clone, CanyonCrud, CanyonMapper, Serialize)]
