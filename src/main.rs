@@ -1,27 +1,57 @@
 extern crate rocket;
 
+mod models;
+
 use rocket::get;
 use rocket::http::Status;
 use rocket::response::status;
 
-use canyon_sql::*;
-mod team;
-mod search_bar;
-use search_bar::SearchBarData;
-use team::Team;
+use canyon_sql::{*, crud::CrudOperations};
+
+use models::{
+    leagues::League,
+    tournaments::Tournament,
+    teams::Team,
+    players::Player,
+    search_bar::SearchBarData
+};
 
 use rocket::serde::json::Json;
 
+#[get("/leagues")]
+async fn leagues() -> status::Custom<Json<Vec<League>>> {
+    let all_leagues: Result<Vec<League>, _> = League::find_all().await;
+    match all_leagues {
+        Ok(leagues) => status::Custom(Status::Accepted, Json(leagues)),
+        Err(e) => {
+            eprintln!("Error on leagues: {:?}", e);
+            status::Custom(Status::InternalServerError, Json(vec![]))
+        }
+    }
+}
 
-#[get("/")]
+#[get("/tournaments")]
+async fn tournaments() -> status::Custom<Json<Vec<Tournament>>> {
+    let all_tournaments: Vec<Tournament> = Tournament::find_all_unchecked().await;
+    status::Custom(Status::Accepted, Json(all_tournaments))
+}
+
+#[get("/teams")]
 async fn teams() -> status::Custom<Json<Vec<Team>>> {
-    let all_teams: Vec<Team> = Team::find_all().await;
+    let all_teams: Vec<Team> = Team::find_all_unchecked().await;
     status::Custom(Status::Accepted, Json(all_teams))
+}
+
+
+#[get("/players")]
+async fn players() -> status::Custom<Json<Vec<Player>>> {
+    let all_players: Vec<Player> = Player::find_all_unchecked().await;
+    status::Custom(Status::Accepted, Json(all_players))
 }
 
 #[get("/search-bar-data")]
 async fn search_bar_data() -> status::Custom<Json<Vec<SearchBarData>>> {
-    let all_teams: Vec<Team> = Team::find_all().await;
+    let all_teams: Vec<Team> = Team::find_all_unchecked().await;
     let mut search_bar_entities: Vec<SearchBarData> = Vec::new();
 
     all_teams.into_iter().for_each(|team|
@@ -37,6 +67,14 @@ async fn search_bar_data() -> status::Custom<Json<Vec<SearchBarData>>> {
 #[rocket::launch]
 fn rocket() -> _ {
     rocket::build()
-        .mount("/", rocket::routes![teams])
-        .mount("/api", rocket::routes![search_bar_data])
+        .mount(
+            "/api",
+            rocket::routes![
+                leagues,
+                tournaments,
+                teams,
+                players,
+                search_bar_data
+            ]
+        )
 }
