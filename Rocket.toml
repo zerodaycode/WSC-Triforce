@@ -1,16 +1,16 @@
-[development]
+[debug]
 address = "192.168.1.133"
+log = "debug"
+port = 8000
+
+[development]
+address = "0.0.0.0"
 log = "debug"
 port = 8000
 
 # ROCKET_PROFILE=development cargo run
 
-[staging]
-address = "0.0.0.0"
-log = "normal"
-port = 2727
-
-[production]
+[release]
 address = "0.0.0.0"
 log = "critical"
 port = 2727

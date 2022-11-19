@@ -1,6 +1,7 @@
 extern crate rocket;
 
 mod models;
+mod utils;
 
 use rocket::get;
 use rocket::http::Status;
@@ -17,6 +18,7 @@ use models::{
 };
 
 use rocket::serde::json::Json;
+use utils::triforce_catalog::TriforceCatalog;
 
 #[get("/leagues")]
 async fn leagues() -> status::Custom<Json<Vec<League>>> {
@@ -56,6 +58,7 @@ async fn search_bar_data() -> status::Custom<Json<Vec<SearchBarData>>> {
 
     all_teams.into_iter().for_each(|team|
         search_bar_entities.push(SearchBarData {
+            kind: TriforceCatalog::Team,
             entity_name: team.name,
             entity_image_url: team.image_url,
             entity_alt_data: team.slug,
