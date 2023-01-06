@@ -1,10 +1,10 @@
 use serde::Serialize;
-use canyon_sql::{*, date_time::NaiveDate};
+use canyon_sql::{macros::*, date_time::NaiveDate};
 
 use super::leagues::League;
 
 #[derive(Debug, Clone, CanyonCrud, CanyonMapper, Serialize)]
-#[canyon_macros::canyon_entity]
+#[canyon_entity]
 pub struct Tournament {
     #[primary_key]
     id: i32,

@@ -7,7 +7,7 @@ use rocket::get;
 use rocket::http::Status;
 use rocket::response::status;
 
-use canyon_sql::{*, crud::CrudOperations};
+use canyon_sql::crud::CrudOperations;
 
 use models::{
     leagues::League,
@@ -67,11 +67,11 @@ async fn search_bar_data() -> status::Custom<Json<Vec<SearchBarData>>> {
     status::Custom(Status::Accepted, Json(search_bar_entities))
 }
 
-#[rocket::launch]
-fn rocket() -> _ {
+#[canyon_sql::main]
+fn main() {
     rocket::build()
         .mount(
-            "/api",
+            "/api", 
             rocket::routes![
                 leagues,
                 tournaments,
@@ -79,5 +79,7 @@ fn rocket() -> _ {
                 players,
                 search_bar_data
             ]
-        )
+        ).launch()
+        .await
+        .ok(); // TODO Tremendous error handling instead .ok()
 }

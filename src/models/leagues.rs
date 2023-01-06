@@ -1,8 +1,8 @@
 use serde::Serialize;
-use canyon_sql::*;
+use canyon_sql::macros::*;
 
 #[derive(Debug, Clone, CanyonCrud, CanyonMapper, Serialize)]
-#[canyon_macros::canyon_entity]
+#[canyon_entity]
 pub struct League {
     #[primary_key]
     id: i32,

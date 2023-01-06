@@ -1,12 +1,10 @@
-use std::default;
-
 use serde::Serialize;
 
 /// TODO Docs
 #[derive(Debug, Default, Serialize)]
+#[allow(unused)]
 pub enum TriforceCatalog {
-    #[default]
-    League,
+    #[default] League,
     Tournament,
     Team,
     Player
