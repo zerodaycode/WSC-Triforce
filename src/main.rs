@@ -2,6 +2,7 @@ extern crate rocket;
 
 mod models;
 mod utils;
+mod data_pull;
 
 use rocket::get;
 use rocket::http::Status;
