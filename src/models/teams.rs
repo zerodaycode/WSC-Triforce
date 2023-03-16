@@ -1,7 +1,7 @@
 use serde::Serialize;
 use canyon_sql::macros::*;
 
-#[derive(Debug, Clone, CanyonCrud, CanyonMapper, Serialize)]
+#[derive(Debug, Clone, Fields, CanyonCrud, CanyonMapper, Serialize)]
 #[canyon_entity]
 pub struct Team {
     #[primary_key]

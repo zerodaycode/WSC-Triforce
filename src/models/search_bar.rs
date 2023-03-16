@@ -7,4 +7,5 @@ pub struct SearchBarData {
     pub entity_name: String,
     pub entity_image_url: String,
     pub entity_alt_data: String,
+    pub player_role: Option<String>,
 }
