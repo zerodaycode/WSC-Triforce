@@ -7,7 +7,7 @@ use rocket::get;
 use rocket::http::Status;
 use rocket::response::status;
 
-use canyon_sql::{crud::CrudOperations, query::{ops::QueryBuilder, operators::Comp}};
+use canyon_sql::{crud::{CrudOperations, Transaction}, query::{ops::QueryBuilder, operators::Comp}};
 
 use models::{
     leagues::League,
@@ -15,7 +15,7 @@ use models::{
     teams::*,
     players::*,
     search_bar::SearchBarData,
-    schedules::Schedule
+    ts::TeamSchedule
 };
 
 use rocket::serde::json::Json;
@@ -39,10 +39,24 @@ async fn tournaments() -> status::Custom<Json<Vec<Tournament>>> {
     status::Custom(Status::Accepted, Json(all_tournaments))
 }
 
-#[get("/schedules")]
-async fn schedules() -> status::Custom<Json<Vec<Schedule>>> {
-    let all_schedules: Vec<Schedule> = Schedule::find_all_unchecked().await;
-    status::Custom(Status::Accepted, Json(all_schedules))
+#[get("/team/<team_id>/schedule")]
+async fn find_team_schedule(team_id: i64) -> status::Custom<Json<Vec<TeamSchedule>>> {
+    let query = format!("SELECT s.*,
+    (select t.image_url from team t where t.id = s.team_left_id) as team_left_img_url,
+    (select t.image_url from team t where t.id = s.team_right_id) as team_right_img_url
+    from schedule s where s.team_left_id = {team_id} or s.team_right_id = {team_id}");
+
+    let schedules = TeamSchedule::query(query, [], "")
+        .await
+        .map(|r| r.get_entities::<TeamSchedule>());
+    
+    match schedules {
+        Ok(v) => status::Custom(Status::Accepted, Json(v)),
+        Err(e) => {
+            eprintln!("{e}");
+            status::Custom(Status::InternalServerError, Json(Vec::new())) // TODO Replace the empty json
+        },
+    }
 }
 
 #[get("/teams")]
@@ -78,6 +92,7 @@ async fn search_bar_data(query: &str) -> status::Custom<Json<Vec<SearchBarData>>
     if let Ok(teams) = all_teams {
         teams.into_iter().for_each(|team|
             search_bar_entities.push(SearchBarData {
+                id: team.id,
                 kind: TriforceCatalog::Team,
                 entity_name: team.name,
                 entity_image_url: team.image_url,
@@ -90,6 +105,7 @@ async fn search_bar_data(query: &str) -> status::Custom<Json<Vec<SearchBarData>>
     if let Ok(players) = all_players {
         players.into_iter().for_each(|player|
             search_bar_entities.push(SearchBarData {
+                id: player.id,
                 kind: TriforceCatalog::Player,
                 entity_name: player.summoner_name,
                 entity_image_url: player.image_url.unwrap_or_default(),
@@ -110,7 +126,7 @@ fn main() {
             rocket::routes![
                 leagues,
                 tournaments,
-                schedules,
+                find_team_schedule,
                 teams,
                 players,
                 search_bar_data
