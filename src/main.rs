@@ -41,10 +41,16 @@ async fn tournaments() -> status::Custom<Json<Vec<Tournament>>> {
 
 #[get("/team/<team_id>/schedule")]
 async fn find_team_schedule(team_id: i64) -> status::Custom<Json<Vec<TeamSchedule>>> {
-    let query = format!("SELECT s.*,
-    (select t.image_url from team t where t.id = s.team_left_id) as team_left_img_url,
-    (select t.image_url from team t where t.id = s.team_right_id) as team_right_img_url
-    from schedule s where s.team_left_id = {team_id} or s.team_right_id = {team_id}");
+    let query = format!(
+        "SELECT s.*,
+            (select t.name from team t where t.id = s.team_left_id) as team_left_name,
+            (select t.name from team t where t.id = s.team_right_id) as team_right_name,
+            (select t.image_url from team t where t.id = s.team_left_id) as team_left_img_url,
+            (select t.image_url from team t where t.id = s.team_right_id) as team_right_img_url
+        from schedule s
+            where s.team_left_id = {team_id} or s.team_right_id = {team_id}
+        order by s.start_time desc"
+    );
 
     let schedules = TeamSchedule::query(query, [], "")
         .await
