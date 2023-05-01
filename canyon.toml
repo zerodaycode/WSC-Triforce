@@ -1,4 +1,12 @@
 [canyon_sql]
-datasources = [
-    {name = 'triforce_psql', properties.db_type = 'postgresql', properties.username = 'zdc', properties.password = 'ggprueba', properties.host = '192.168.1.250', properties.port = 5432, properties.db_name = 'triforce'},
-]
+
+[[canyon_sql.datasources]]
+name = 'postgres'
+
+[canyon_sql.datasources.auth]
+postgresql = { basic = { username = 'zdc', password = 'ggprueba'}}
+
+[canyon_sql.datasources.properties]
+host = '192.168.1.250'
+port = 5432
+db_name = 'triforce'
