@@ -18,6 +18,8 @@ pub struct TeamSchedule {
     team_left_wins: Option<i64>,
     team_right_id: Option<i64>,
     team_right_wins: Option<i64>,
-    team_left_img_url: Option<String>, 
+    team_left_img_url: Option<String>,
+    team_left_name: Option<String>,
     team_right_img_url: Option<String>, 
+    team_right_name: Option<String>,
 }
