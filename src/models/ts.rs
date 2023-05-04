@@ -10,7 +10,7 @@ pub struct TeamSchedule {
     state: String,
     event_type: String,
     blockname: Option<String>,
-    league_id: Option<i64>,
+    league_name: Option<String>,
     match_id: Option<i64>,
     strategy: Option<String>,
     strategy_count: Option<i64>,

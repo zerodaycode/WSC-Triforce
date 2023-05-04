@@ -42,16 +42,23 @@ async fn tournaments() -> status::Custom<Json<Vec<Tournament>>> {
 #[get("/preview-incoming-events")]
 async fn preview_incoming_events() -> status::Custom<Json<Vec<TeamSchedule>>> {
     let query = format!(
-        "SELECT s.*,
-            (select t.code from team t where t.id = s.team_left_id) as team_left_name,
-            (select t.code from team t where t.id = s.team_right_id) as team_right_name,
-            (select t.image_url from team t where t.id = s.team_left_id) as team_left_img_url,
-            (select t.image_url from team t where t.id = s.team_right_id) as team_right_img_url
-        from schedule s 
-            where state != 'completed' 
-            and event_type = 'match'
-        order by s.start_time asc
-        fetch first 30 rows only"
+        "SELECT s.id, s.start_time, s.state, s.event_type, s.blockname, s.match_id, s.strategy, s.strategy_count,
+            s.team_left_id, s.team_left_wins, s.team_right_id, s.team_right_wins,
+            tl.code AS team_left_name,
+            tr.code AS team_right_name,
+            tl.image_url AS team_left_img_url,
+            tr.image_url AS team_right_img_url,
+            l.\"name\" AS league_name
+        FROM schedule s
+            JOIN team tl ON s.team_left_id = tl.id
+            JOIN team tr ON s.team_right_id = tr.id
+            JOIN league l ON s.league_id = l.id
+        WHERE s.state <> 'completed'
+            AND s.event_type = 'match'
+            AND tl.code <> 'TBD'
+            AND tr.code <> 'TBD'
+        ORDER BY s.start_time ASC
+        FETCH FIRST 30 ROWS ONLY"
     );
 
     let schedules = TeamSchedule::query(query, [], "")
@@ -75,14 +82,19 @@ async fn preview_incoming_events() -> status::Custom<Json<Vec<TeamSchedule>>> {
 #[get("/team/<team_id>/schedule")]
 async fn find_team_schedule(team_id: i64) -> status::Custom<Json<Vec<TeamSchedule>>> {
     let query = format!(
-        "SELECT s.*,
-            (select t.name from team t where t.id = s.team_left_id) as team_left_name,
-            (select t.name from team t where t.id = s.team_right_id) as team_right_name,
-            (select t.image_url from team t where t.id = s.team_left_id) as team_left_img_url,
-            (select t.image_url from team t where t.id = s.team_right_id) as team_right_img_url
-        from schedule s
-            where s.team_left_id = {team_id} or s.team_right_id = {team_id}
-        order by s.start_time desc"
+        "SELECT s.id, s.start_time, s.state, s.event_type, s.blockname, s.match_id, s.strategy, s.strategy_count,
+            s.team_left_id, s.team_left_wins, s.team_right_id, s.team_right_wins,
+            tl.name AS team_left_name,
+            tr.name AS team_right_name,
+            tl.image_url AS team_left_img_url,
+            tr.image_url AS team_right_img_url,
+            l.\"name\" AS league_name
+        FROM schedule s
+            JOIN team tl ON s.team_left_id = tl.id
+            JOIN team tr ON s.team_right_id = tr.id
+            JOIN league l ON s.league_id = l.id
+        WHERE s.team_left_id = {team_id} OR s.team_right_id = {team_id}
+        ORDER BY s.start_time DESC"
     );
 
     let schedules = TeamSchedule::query(query, [], "")
