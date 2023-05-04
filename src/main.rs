@@ -75,11 +75,13 @@ async fn preview_incoming_events() -> status::Custom<Json<Vec<TeamSchedule>>> {
 #[get("/team/<team_id>/schedule")]
 async fn find_team_schedule(team_id: i64) -> status::Custom<Json<Vec<TeamSchedule>>> {
     let query = format!(
-        "SELECT s.*,
+        "SELECT s.id, s.start_time, s.state, s.event_type, s.blockname, s.match_id, s.strategy, s.strategy_count,
+            s.team_left_id, s.team_left_wins, s.team_right_id, s.team_right_wins,
             (select t.name from team t where t.id = s.team_left_id) as team_left_name,
             (select t.name from team t where t.id = s.team_right_id) as team_right_name,
             (select t.image_url from team t where t.id = s.team_left_id) as team_left_img_url,
-            (select t.image_url from team t where t.id = s.team_right_id) as team_right_img_url
+            (select t.image_url from team t where t.id = s.team_right_id) as team_right_img_url,
+            (select l.name from league l where l.id = s.league_id) as league_name
         from schedule s
             where s.team_left_id = {team_id} or s.team_right_id = {team_id}
         order by s.start_time desc"
