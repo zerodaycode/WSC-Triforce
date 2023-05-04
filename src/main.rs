@@ -43,20 +43,19 @@ async fn tournaments() -> status::Custom<Json<Vec<Tournament>>> {
 async fn preview_incoming_events() -> status::Custom<Json<Vec<TeamSchedule>>> {
     let query = format!(
         "SELECT s.id, s.start_time, s.state, s.event_type, s.blockname, s.match_id, s.strategy, s.strategy_count,
-            s.team_left_id, s.team_left_wins, s.team_right_id, s.team_right_wins,
-            tl.code AS team_left_name,
-            tr.code AS team_right_name,
-            tl.image_url AS team_left_img_url,
-            tr.image_url AS team_right_img_url,
-            l.\"name\" AS league_name
+        s.team_left_id, s.team_left_wins, s.team_right_id, s.team_right_wins,
+        tl.code AS team_left_name,
+        tr.code AS team_right_name,
+        tl.image_url AS team_left_img_url,
+        tr.image_url AS team_right_img_url,
+        l.\"name\" AS league_name
         FROM schedule s
             JOIN team tl ON s.team_left_id = tl.id
             JOIN team tr ON s.team_right_id = tr.id
             JOIN league l ON s.league_id = l.id
         WHERE s.state <> 'completed'
             AND s.event_type = 'match'
-            AND tl.slug <> 'tbd'
-            AND tr.slug <> 'tbd'
+            AND NOT (tl.slug = 'tbd' AND tr.slug = 'tbd')
         ORDER BY s.start_time ASC
         FETCH FIRST 30 ROWS ONLY"
     );
