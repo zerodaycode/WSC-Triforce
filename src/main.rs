@@ -55,20 +55,15 @@ async fn preview_incoming_events() -> status::Custom<Json<Vec<TeamSchedule>>> {
             JOIN league l ON s.league_id = l.id
         WHERE s.state <> 'completed'
             AND s.event_type = 'match'
-            AND tl.code <> 'TBD'
-            AND tr.code <> 'TBD'
+            AND tl.slug <> 'tbd'
+            AND tr.slug <> 'tbd'
         ORDER BY s.start_time ASC
         FETCH FIRST 30 ROWS ONLY"
     );
 
     let schedules = TeamSchedule::query(query, [], "")
         .await
-        .map(|r| {
-            r.into_results::<TeamSchedule>()
-                .into_iter()
-                .filter(|v| v.team_left_name.as_deref() != Some("TBDA"))
-                .collect()
-        });
+        .map(|r| r.into_results::<TeamSchedule>());
     
     match schedules {
         Ok(v) => status::Custom(Status::Accepted, Json(v)),
