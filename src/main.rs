@@ -43,18 +43,25 @@ async fn tournaments() -> status::Custom<Json<Vec<Tournament>>> {
 async fn preview_incoming_events() -> status::Custom<Json<Vec<TeamSchedule>>> {
     let query = format!(
         "SELECT s.*,
-            (select t.name from team t where t.id = s.team_left_id) as team_left_name,
-            (select t.name from team t where t.id = s.team_right_id) as team_right_name,
+            (select t.code from team t where t.id = s.team_left_id) as team_left_name,
+            (select t.code from team t where t.id = s.team_right_id) as team_right_name,
             (select t.image_url from team t where t.id = s.team_left_id) as team_left_img_url,
             (select t.image_url from team t where t.id = s.team_right_id) as team_right_img_url
         from schedule s 
-        order by s.start_time desc
+            where state != 'completed' 
+            and event_type = 'match'
+        order by s.start_time asc
         fetch first 30 rows only"
     );
 
     let schedules = TeamSchedule::query(query, [], "")
         .await
-        .map(|r| r.into_results::<TeamSchedule>());
+        .map(|r| {
+            r.into_results::<TeamSchedule>()
+                .into_iter()
+                .filter(|v| v.team_left_name.as_deref() != Some("TBDA"))
+                .collect()
+        });
     
     match schedules {
         Ok(v) => status::Custom(Status::Accepted, Json(v)),
