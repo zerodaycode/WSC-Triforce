@@ -1,5 +1,5 @@
-use serde::Serialize;
 use crate::utils::triforce_catalog::TriforceCatalog;
+use serde::Serialize;
 
 #[derive(Default, Serialize)]
 pub struct SearchBarData {
