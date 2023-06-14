@@ -1,4 +1,4 @@
-use crate::utils::triforce_catalog::TriforceCatalog;
+use crate::{utils::triforce_catalog::TriforceCatalog, models::{league_with_streams::LeagueWithStreams, stream::Stream}};
 use rocket::get;
 use rocket::http::Status;
 use rocket::response::status;
@@ -156,6 +156,56 @@ async fn players(
     }
 }
 
+#[get("/leagues-with-streams")]
+async fn leagues_with_streams( key_result: ApiKeyResult) -> Result<status::Custom<Json<Vec<LeagueWithStreams>>>, ApiKeyError>  {
+    match key_result {
+        ApiKeyResult::Ok(_key) => {
+            let all_leagues: Result<Vec<League>, _> = League::find_all().await;
+
+            let query = format!(
+                "SELECT
+                s.league_id,
+                    s.league_id,
+                    st.provider,
+                    st.parameter,
+                    st.locale,
+                    st.english_name
+                FROM
+                    public.stream st
+                JOIN
+                    public.schedule s ON st.event_id = s.id  AND s.state = 'inProgress'"
+            );
+        
+            let streams = Stream::query(query, [], "")
+                .await
+                .map(|r| r.into_results::<Stream>());
+        
+            match (all_leagues, streams) {
+                (Ok(leagues), Ok(current_streams)) => {
+                    let mut leagues_with_streams: Vec<LeagueWithStreams> = Vec::new();
+        
+                    for league in leagues {
+                        let streams_for_league: Vec<Stream> = current_streams
+                            .iter()
+                            .filter(|stream| stream.league_id == Some(league.id.into()))
+                            .cloned()
+                            .collect();
+                        let league_with_streams =
+                            LeagueWithStreams::from_league_and_streams(league, streams_for_league);
+        
+                        leagues_with_streams.push(league_with_streams);
+                    }
+                    Ok(status::Custom(Status::Accepted, Json(leagues_with_streams)))
+                }
+                // TODO Implement Error Control
+                _ => Ok(status::Custom(Status::InternalServerError, Json(vec![]))),
+            }
+        }
+        ApiKeyResult::Err(err) => Err(err),
+    }
+}
+
+
 #[get("/search-bar-data/<query>")]
 async fn search_bar_data(
     key_result: ApiKeyResult,
@@ -220,6 +270,7 @@ pub fn routes() -> Vec<rocket::Route> {
         find_team_schedule,
         teams,
         players,
+        leagues_with_streams,
         search_bar_data
     ]
 }

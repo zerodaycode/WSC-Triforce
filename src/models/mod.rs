@@ -1,7 +1,9 @@
+pub mod league_with_streams;
 pub mod leagues;
 pub mod players;
 pub mod schedules;
 pub mod search_bar;
+pub mod stream;
 pub mod teams;
 pub mod tournaments;
 pub mod ts;
