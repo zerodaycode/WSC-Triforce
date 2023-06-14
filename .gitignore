@@ -2,3 +2,4 @@
 /Cargo.lock
 secrets.toml
 vscode/
+.env
