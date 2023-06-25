@@ -4,9 +4,9 @@
 name = 'postgres'
 
 [canyon_sql.datasources.auth]
-postgresql = { basic = { username = 'zdc', password = 'ggprueba'}}
+postgresql = { basic = { username = 'postgres', password = 'postgres'}}
 
 [canyon_sql.datasources.properties]
-host = '192.168.1.250'
-port = 5432
-db_name = 'triforce'
+host = 'localhost'
+port = 5438
+db_name = 'postgres'
