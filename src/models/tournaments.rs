@@ -1,5 +1,5 @@
+use canyon_sql::{date_time::NaiveDate, macros::*};
 use serde::Serialize;
-use canyon_sql::{macros::*, date_time::NaiveDate};
 
 use super::leagues::League;
 
@@ -13,5 +13,5 @@ pub struct Tournament {
     start_date: NaiveDate,
     end_date: NaiveDate,
     #[foreign_key(table = "league", column = "id")]
-    league: i32
+    league: i32,
 }

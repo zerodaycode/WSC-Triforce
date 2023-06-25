@@ -18,4 +18,4 @@ pub struct Schedule {
     team_left_wins: Option<i64>,
     team_right_id: Option<i64>,
     team_right_wins: Option<i64>    
-}
+} 
