@@ -165,18 +165,29 @@ async fn players() -> status::Custom<Json<Vec<Player>>> {
 async fn search_bar_data(query: &str) -> status::Custom<Json<Vec<SearchBarData>>> {
     let mut search_bar_entities: Vec<SearchBarData> = Vec::new();
 
-    // TODO Replace for .like(...) clauses when released
-    let all_teams: Result<Vec<Team>, _> = Team::select_query()
-        .r#where(TeamFieldValue::name(&query), Comp::Eq)
-        .or(TeamFieldValue::slug(&query), Comp::Eq)
-        .query()
-        .await;
-    let all_players: Result<Vec<Player>, _> = Player::select_query()
-        .r#where(PlayerFieldValue::first_name(&query), Comp::Eq)
-        .or(PlayerFieldValue::last_name(&query), Comp::Eq)
-        .or(PlayerFieldValue::summoner_name(&query), Comp::Eq)
-        .query()
-        .await;
+
+    let query_teams = format!(
+        "SELECT * FROM team t
+        WHERE t.\"name\" ILIKE '%{query}%'
+        OR t.slug ILIKE '%{query}%'
+        OR t.code ILIKE '%{query}%'
+        ORDER BY t.id DESC");
+
+    
+    let query_players = format!(
+        "SELECT * FROM player p
+        WHERE p.first_name ILIKE '%{query}%' 
+        OR p.last_name ILIKE '%{query}%'
+        OR  p.summoner_name  ILIKE '%{query}%'");
+
+
+        let all_teams = Team::query(query_teams, [], "")
+        .await
+        .map(|r| r.into_results::<Team>());
+
+        let all_players = Player::query(query_players, [], "")
+        .await
+        .map(|r| r.into_results::<Player>());
 
     if let Ok(teams) = all_teams {
         teams.into_iter().for_each(|team| {
