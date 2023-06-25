@@ -165,27 +165,26 @@ async fn players() -> status::Custom<Json<Vec<Player>>> {
 async fn search_bar_data(query: &str) -> status::Custom<Json<Vec<SearchBarData>>> {
     let mut search_bar_entities: Vec<SearchBarData> = Vec::new();
 
-
     let query_teams = format!(
         "SELECT * FROM team t
         WHERE t.\"name\" ILIKE '%{query}%'
         OR t.slug ILIKE '%{query}%'
         OR t.code ILIKE '%{query}%'
-        ORDER BY t.id DESC");
+        ORDER BY t.id DESC"
+    );
 
-    
     let query_players = format!(
         "SELECT * FROM player p
         WHERE p.first_name ILIKE '%{query}%' 
         OR p.last_name ILIKE '%{query}%'
-        OR  p.summoner_name  ILIKE '%{query}%'");
+        OR  p.summoner_name  ILIKE '%{query}%'"
+    );
 
-
-        let all_teams = Team::query(query_teams, [], "")
+    let all_teams = Team::query(query_teams, [], "")
         .await
         .map(|r| r.into_results::<Team>());
 
-        let all_players = Player::query(query_players, [], "")
+    let all_players = Player::query(query_players, [], "")
         .await
         .map(|r| r.into_results::<Player>());
 

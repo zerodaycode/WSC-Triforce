@@ -1,6 +1,6 @@
 use serde::Serialize;
 
-use super::{stream::Stream, leagues::League};
+use super::{leagues::League, stream::Stream};
 
 #[derive(Default, Serialize)]
 pub struct LeagueWithStreams {
@@ -10,7 +10,7 @@ pub struct LeagueWithStreams {
     name: String,
     region: String,
     image_url: String,
-    pub streams: Vec<Stream>
+    pub streams: Vec<Stream>,
 }
 
 impl LeagueWithStreams {
