@@ -1,11 +1,11 @@
 use rocket::response::{self};
 
+use dotenvy_macro::dotenv;
 use rocket::http::Status;
 use rocket::request::{FromRequest, Outcome};
 use rocket::response::Responder;
 use rocket::{Request, Response};
 use serde_json::json;
-use dotenvy_macro::dotenv;
 
 use rocket::http::ContentType;
 

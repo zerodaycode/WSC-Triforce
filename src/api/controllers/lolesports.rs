@@ -1,4 +1,7 @@
-use crate::{utils::triforce_catalog::TriforceCatalog, models::{league_with_streams::LeagueWithStreams, stream::Stream}};
+use crate::{
+    models::{league_with_streams::LeagueWithStreams, stream::Stream},
+    utils::triforce_catalog::TriforceCatalog,
+};
 use rocket::get;
 use rocket::http::Status;
 use rocket::response::status;
@@ -157,7 +160,9 @@ async fn players(
 }
 
 #[get("/leagues-with-streams")]
-async fn leagues_with_streams( key_result: ApiKeyResult) -> Result<status::Custom<Json<Vec<LeagueWithStreams>>>, ApiKeyError>  {
+async fn leagues_with_streams(
+    key_result: ApiKeyResult,
+) -> Result<status::Custom<Json<Vec<LeagueWithStreams>>>, ApiKeyError> {
     match key_result {
         ApiKeyResult::Ok(_key) => {
             let all_leagues: Result<Vec<League>, _> = League::find_all().await;
@@ -175,15 +180,15 @@ async fn leagues_with_streams( key_result: ApiKeyResult) -> Result<status::Custo
                 JOIN
                     public.schedule s ON st.event_id = s.id  AND s.state = 'inProgress'"
             );
-        
+
             let streams = Stream::query(query, [], "")
                 .await
                 .map(|r| r.into_results::<Stream>());
-        
+
             match (all_leagues, streams) {
                 (Ok(leagues), Ok(current_streams)) => {
                     let mut leagues_with_streams: Vec<LeagueWithStreams> = Vec::new();
-        
+
                     for league in leagues {
                         let streams_for_league: Vec<Stream> = current_streams
                             .iter()
@@ -192,7 +197,7 @@ async fn leagues_with_streams( key_result: ApiKeyResult) -> Result<status::Custo
                             .collect();
                         let league_with_streams =
                             LeagueWithStreams::from_league_and_streams(league, streams_for_league);
-        
+
                         leagues_with_streams.push(league_with_streams);
                     }
                     Ok(status::Custom(Status::Accepted, Json(leagues_with_streams)))
@@ -205,7 +210,6 @@ async fn leagues_with_streams( key_result: ApiKeyResult) -> Result<status::Custo
     }
 }
 
-
 #[get("/search-bar-data/<query>")]
 async fn search_bar_data(
     key_result: ApiKeyResult,
@@ -215,17 +219,28 @@ async fn search_bar_data(
         ApiKeyResult::Ok(_key) => {
             let mut search_bar_entities: Vec<SearchBarData> = Vec::new();
 
-            let all_teams: Result<Vec<Team>, _> = Team::select_query()
-                .r#where(TeamFieldValue::name(&query), Comp::Eq)
-                .or(TeamFieldValue::slug(&query), Comp::Eq)
-                .query()
-                .await;
-            let all_players: Result<Vec<Player>, _> = Player::select_query()
-                .r#where(PlayerFieldValue::first_name(&query), Comp::Eq)
-                .or(PlayerFieldValue::last_name(&query), Comp::Eq)
-                .or(PlayerFieldValue::summoner_name(&query), Comp::Eq)
-                .query()
-                .await;
+            let query_teams = format!(
+                "SELECT * FROM team t
+                WHERE t.\"name\" ILIKE '%{query}%'
+                OR t.slug ILIKE '%{query}%'
+                OR t.code ILIKE '%{query}%'
+                ORDER BY t.id DESC"
+            );
+
+            let query_players = format!(
+                "SELECT * FROM player p
+                WHERE p.first_name ILIKE '%{query}%' 
+                OR p.last_name ILIKE '%{query}%'
+                OR  p.summoner_name  ILIKE '%{query}%'"
+            );
+
+            let all_teams = Team::query(query_teams, [], "")
+                .await
+                .map(|r| r.into_results::<Team>());
+
+            let all_players = Player::query(query_players, [], "")
+                .await
+                .map(|r| r.into_results::<Player>());
 
             if let Ok(teams) = all_teams {
                 teams.into_iter().for_each(|team| {
